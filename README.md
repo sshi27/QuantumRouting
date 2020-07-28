@@ -18,6 +18,19 @@ Our paper will appear in ACM SIGCOMM 2020.
 - `quantum/Plot.kt`         generates all simulation figure data
 - `quantum/Analytical.kt`   generates all analytical figure data
 
+
+## Hardware and Software requirements. 
+
+Hardware requirements: 
+A commodity server or a virtual/cloud/hosted server with the hardware:
+  - Internet access
+  - 16GiB RAM
+  - A powerful CPU, e.g., Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz
+  - 1.8GiB HDD/SSD available for logging and plotting
+
+Software requirements: 
+  - Any OS with lasted Docker and Git installed. For completeness, we put the installation steps later in the PS. 
+
 ## Run demo with GUI
 
 ```bash
@@ -91,6 +104,38 @@ Basically, you create a new routing algorithm in two steps:
 ```
 
 You can refer to "GreedyHopRouting.kt" as a simple start point.
+
+## Plot with partial logging data
+A whole simulation round takes typically ~ 1 day on a powerful multi-core CPU (e.g. i7-7700), and each pass takes about 2 GiB of disk space for logging. 
+The current number of rounds is set to 1, which is enough for all simulation results and graph plotting. You can change the number of rounds at `src\main\kotlin\quantum\configs.kt:21`
+
+During a multi-round simulation, you can stop the simulation and still get the complete set of graphs, if a single round is completed (when a file `dist/50#2-0.9-3-0.6-6-10-CR.txt` exists). You can even stop anywhere and run plotting based on the current partial logs. Some points on the figures may be missing, though. 
+
+
+Detailed steps: 
+0. Keep the simulation running, just in case. And open another terminal, or press ctrl+z to halt the simulation without terminating it. 
+
+1. Make sure the plotting script is running
+```bash
+ps aux | grep file-watcher
+```
+2. If something like "python file-watcher.py" is shown, then skip this step. Else, please run
+```bash
+cd plot
+python3 file-watcher.py &
+```
+
+3. Continue in the previous terminal: 
+```bash
+cd ../QuantumRouting
+mvn exec:java -D"exec.mainClass"="quantum.Plot"
+```
+
+4. Find generated figures. 
+```bash
+cd ../plot/dist && ls
+```
+
 
 ## Authors
 
