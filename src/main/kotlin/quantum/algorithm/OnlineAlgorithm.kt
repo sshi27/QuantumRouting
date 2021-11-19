@@ -254,16 +254,31 @@ open class OnlineAlgorithm(topo: Topo, val allowRecoveryPaths: Boolean = true) :
         p.dropLast(2).zip(p.drop(1).dropLast(1)).zip(p.drop(2)).forEach { (n12, next) ->
           val (prev, n) = n12
           
-          val prevLinks = n.links.filter { it.entangled && !it.swappedAt(n) && it.contains(prev) }.sortedBy { it.id }.take(1)
-          val nextLinks = n.links.filter { it.entangled && !it.swappedAt(n) && it.contains(next) }.sortedBy { it.id }.take(1)
+          val prevLinks = n.links.filter { it.entangled && !it.swappedAt(n) && it.contains(prev) && !it.utilized }.sortedBy { it.id }.take(1)
+          val nextLinks = n.links.filter { it.entangled && !it.swappedAt(n) && it.contains(next) && !it.utilized }.sortedBy { it.id }.take(1)
           
           prevLinks.zip(nextLinks).forEach { (l1, l2) ->
             n.attemptSwapping(l1, l2)
+            l1.utilize()
+            if (next == p.last()) {
+              l2.utilize()
+            }
           }
         }
       }
       
-      val succ = topo.getEstablishedEntanglements(majorPath.first(), majorPath.last()).size - oldNumOfPairs
+      var succ = 0
+      if (majorPath.size > 2) {
+        succ = topo.getEstablishedEntanglements(majorPath.first(), majorPath.last()).size - oldNumOfPairs
+      } else {
+        val SDlinks = majorPath.first().links.filter { it.entangled && !it.swappedAt(majorPath.first()) && it.contains(majorPath.last()) && !it.utilized }.sortedBy { it.id }
+        if (SDlinks.isNotEmpty()) {
+          succ = SDlinks.size.coerceAtMost(width)
+          (0..succ - 1).forEach { pid ->
+            SDlinks[pid].utilize()
+          }
+        }
+      }
       logWriter.appendln(""" ${majorPath.map { it.id }}, $width $succ""")
       pathToRecoveryPaths[pathWithWidth].forEach {
         logWriter.appendln("""  ${it.path.map { it.id }}, $width ${it.available} ${it.taken}""")

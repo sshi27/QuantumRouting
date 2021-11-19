@@ -41,6 +41,11 @@ class Link(val topo: Topo, val n1: Node, val n2: Node, val l: Double, var entang
     this.assigned = true
   }
   
+  var utilized = false
+  fun utilize() {
+    this.utilized = true
+  }
+  
   val p = Math.E.pow(-topo.alpha * l)
   
   fun tryEntanglement(): Boolean {
@@ -52,6 +57,7 @@ class Link(val topo: Topo, val n1: Node, val n2: Node, val l: Double, var entang
   fun clearEntanglement() {
     assigned = false
     entangled = false
+    utilized = false
   }
   
   override fun toString(): String {
